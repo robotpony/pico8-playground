@@ -9,13 +9,13 @@ function sprite()
 			legs = 2,
 			eyes = 2,
 			orientation = 0,
-			len = 6
 		},
 		r = { -- character ratios
 			upper = 4,
 			mid = 2,
 			bottom = 3,
-			chonk = 8
+			chonk = 8,
+			len = 0
 		},
 		c = { -- colours
 			accent = 0,
