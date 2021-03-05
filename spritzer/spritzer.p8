@@ -5,16 +5,19 @@ __lua__
 
 #include _sprite.p8
 
+s = {}
+
 function _init()
-	music(0)
+	cls()
+	s = sprite()
+	s:create()
 end
 
 function _update()
 end
 
-
 function _draw()
-	cls()
+	--cls()
 end
 
 __gfx__
