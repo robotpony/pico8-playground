@@ -9,7 +9,7 @@ s = {}
 
 function _init()
 	cls()
-	s = sprite()
+	s = sprite(flr(rnd(1000)))
 	s:create()
 end
 
