@@ -1,4 +1,4 @@
--- A simple sprite generator
+-- A simple randomized (and seeded) sprite character generator
 
 sprite = {}
 function sprite(seed)
@@ -33,11 +33,13 @@ function sprite(seed)
 			end
 			return s
 		end,
+		-- creates a random sprite character
 		create=function(s)
 			s.randomize(s)
 			s.draw(s)
 			s.debug(s)
 		end,
+		-- generate an 8x8 sprite from attributes
 		draw=function(s)
 			w = 7
 			h = 7
@@ -54,6 +56,7 @@ function sprite(seed)
 				end
 			end
 		end,
+		-- generate a sprite's attributes
 		randomize=function(s)
 			-- generate a colour palette for this character
 			s.c.accent = s.roll({0,1,2,3})
@@ -74,13 +77,14 @@ function sprite(seed)
 			s.r.len = s.r.bottom + s.r.mid + s.r.upper
 			s.r.chonk = s.roll(8)
 		end,
+		-- debug output for testing
 		debug=function(s)
 			print("seed: " .. s.seed)
-			
 			s.dump("body", s.b)
 			s.dump("colours", s.c, true)
 			s.dump("ratios", s.r)
 		end,
+		-- dump a table with a heading
 		dump=function(title,tbl,colorize)
 			print(title, 6)
 			for k,v in pairs(tbl) do
@@ -89,6 +93,7 @@ function sprite(seed)
 				print(("  " .. k ..": "..v),c)
 			end
 		end,
+		-- roll a dice within the given range (or table set)
 		roll=function(range)
 			return flr(rnd(range))
 		end
