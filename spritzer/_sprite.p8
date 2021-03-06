@@ -8,7 +8,7 @@ function sprite(seed)
 			arms = 2,
 			legs = 2,
 			eyes = 2,
-			orientation = 0,
+			orient = 0, -- 0/horizontal, 1/vertical
 		},
 		r = { -- character ratios
 			upper = 4,
@@ -66,7 +66,7 @@ function sprite(seed)
 			s.b.legs = s.roll(6)
 			s.b.eyes = s.roll(3) + 1
 			-- pick an orientation (vertical | horizontal)
-			s.b.orientation = s.roll(2)	
+			s.b.orient = s.roll(2)	
 			-- pick body ratios
 			s.r.upper = s.roll(4) + 1
 			s.r.mid = s.roll(2) + 1
