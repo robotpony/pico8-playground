@@ -1,7 +1,7 @@
 -- A simple sprite generator
 
 sprite = {}
-function sprite()
+function sprite(seed)
 	local s = {
 		seed,
 		b = { -- body parts
@@ -64,7 +64,7 @@ function sprite()
 			-- pick body type and proportions
 			s.b.arms = s.roll(4)
 			s.b.legs = s.roll(6)
-			s.b.eyes = s.roll(3)
+			s.b.eyes = s.roll(3) + 1
 			-- pick an orientation (vertical | horizontal)
 			s.b.orientation = s.roll(2)	
 			-- pick body ratios
@@ -94,5 +94,5 @@ function sprite()
 		end
 		
 	}
-	return s.init(s)
+	return s.init(s,seed)
 end
