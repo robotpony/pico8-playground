@@ -7,14 +7,14 @@ w_h_max = 128
 
 function tile(w, h, colour)
 	local t = {
-		w = 6, h = 6, p = 2,
+		w = 2, h = 2, p = 2,
 		c,
 		x = 0, y = 0,
 
 		seed,
 
 		debug = false,
-		start_over = false,
+		start_over = true,
 		stop = false,
 
 		-- the default mutator does NOP
