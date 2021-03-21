@@ -13,21 +13,40 @@ t = {}
 function _init()
 	cls()
 
+	-- pick a random seed
 	local seed = flr(rnd(1000) + 1)
 
 	t = tile()
 	t:setSeed(seed)
 
-	local topDownGradient = function(self)
+	local mutedColours = function(self, first)
 
+		local clr = {15, 15, 15, 14, 13, 12, 6, 1, 143, 142, 141, 134}
+		self.c = rnd(clr)
+
+		if first then return true end
+
+		self.x = self.x + self.w + self.p
+		if self.x > w_h_max then
+			self.x = 0
+			self.y = self.y + self.h + self.p
+		end
+
+		if self.y > w_h_max then
+			if self.start_over then
+				self:reset()
+			else
+				return false
+			end
+		end
+		return true
 	end
 
-	-- t:setMutator(topDownGradient)
+	t:setMutator(mutedColours)
 end
 
 -- clock tick
-function _update60()
-	t:next()
+function _update()
 end
 
 -- draw!

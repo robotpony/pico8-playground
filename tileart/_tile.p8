@@ -7,39 +7,47 @@ w_h_max = 128
 
 function tile(w, h, colour)
 	local t = {
-		w = 2, h = 2, p = 2,
-		c = 0,
+		w = 6, h = 6, p = 2,
+		c,
 		x = 0, y = 0,
 
 		seed,
-		step = 1,
 
+		debug = false,
 		start_over = false,
 		stop = false,
 
-		-- A default mutator
+		-- the default mutator does NOP
+		mutator = function(self)
+			return false
+		end,
+
+		-- reset position
+		reset = function(self)
+			self.x = 0
+			self.y = 0
+		end,
+
+		-- Take the next stamp step
 		next = function(self)
-			if self.stop then return end
+			if self.stop then return false end
 
-			local clr = {15, 14, 13, 12, 6, 1, 143, 142, 141, 134}
-			self.c = rnd(clr)
+			local firstRun = self.c == nil
 
-			self.x = self.x + self.w + self.p
-			if self.x > w_h_max then
-				self.x = 0
-				self.y = self.y + self.h + self.p
-			end
-
-			if self.y > w_h_max then
+			if self:mutator(firstRun) then
+				return true
+			else
 				if self.start_over then
-					self.x = 0
-					self.y = 0
+					self:reset()
+					return true
 				else
 					self.stop = true
+					return false
 				end
 			end
 		end,
 
+		-- A default stamp pattern
 		stampPattern = function(self, x, y, c)
 			rectfill(x, y, x + self.w, y + self.h, c)
 		end,
@@ -62,7 +70,7 @@ function tile(w, h, colour)
 		-- set a mutator iterator
 		--		future: allow multiple mutators
 		setMutator = function(self, f)
-			self.next = f
+			self.mutator = f
 		end,
 
 		-- set a pattern function
@@ -77,6 +85,7 @@ function tile(w, h, colour)
 			y = y or self.y
 			c = c or self.c
 
+			self:next()
 			self:stampPattern(x, y, c)
 		end
 	}
