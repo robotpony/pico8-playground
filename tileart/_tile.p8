@@ -7,7 +7,7 @@ w_h_max = 128
 
 function tile(w, h, colour)
 	local t = {
-		w = 6, h = 6, p = 2,
+		w = 2, h = 2, p = 2,
 		c = 0,
 		x = 0, y = 0,
 
@@ -40,13 +40,15 @@ function tile(w, h, colour)
 			end
 		end,
 
+		stampPattern = function(self, x, y, c)
+			rectfill(x, y, x + self.w, y + self.h, c)
+		end,
+
 		-- create a tile
 		init = function(self, w, h, c)
 			self.w = w or self.w
 			self.h = h or self.h
 			self.c = c or self.c
-			-- pattern?
-
 			return self
 		end,
 
@@ -63,13 +65,19 @@ function tile(w, h, colour)
 			self.next = f
 		end,
 
+		-- set a pattern function
+		--		future: allow multiple mutators
+		setPattern = function(self, f)
+			self.stampPattern = f
+		end,
+
 		-- stamp this tile! (params optional)
 		stamp = function(self, x, y, c)
 			x = x or self.x
 			y = y or self.y
 			c = c or self.c
 
-			rectfill(x, y, x + self.w, y + self.h, c)
+			self:stampPattern(x, y, c)
 		end
 	}
 

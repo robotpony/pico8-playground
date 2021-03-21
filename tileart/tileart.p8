@@ -16,7 +16,7 @@ function _init()
 	local seed = flr(rnd(1000) + 1)
 
 	t = tile()
-	t:setSeed(1)
+	t:setSeed(seed)
 
 	local topDownGradient = function(self)
 
