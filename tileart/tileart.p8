@@ -13,8 +13,10 @@ t = {}
 function _init()
 	cls()
 
+	local seed = flr(rnd(1000) + 1)
+
 	t = tile()
-	t:setSeed(flr(rnd(1000) + 1))
+	t:setSeed(1)
 
 	local topDownGradient = function(self)
 

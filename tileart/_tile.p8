@@ -7,22 +7,36 @@ w_h_max = 128
 
 function tile(w, h, colour)
 	local t = {
-		w = 4, h = 4,
-		c = 1,
+		w = 6, h = 6, p = 2,
+		c = 0,
 		x = 0, y = 0,
 
 		seed,
 		step = 1,
 
-		-- A default next iterator
-		next = function(self)
-			-- a boring default
+		start_over = false,
+		stop = false,
 
-			self.c = flr(rnd(15))
-			self.x = self.x + self.w
+		-- A default mutator
+		next = function(self)
+			if self.stop then return end
+
+			local clr = {15, 14, 13, 12, 6, 1, 143, 142, 141, 134}
+			self.c = rnd(clr)
+
+			self.x = self.x + self.w + self.p
 			if self.x > w_h_max then
 				self.x = 0
-				self.y = self.y + self.h
+				self.y = self.y + self.h + self.p
+			end
+
+			if self.y > w_h_max then
+				if self.start_over then
+					self.x = 0
+					self.y = 0
+				else
+					self.stop = true
+				end
 			end
 		end,
 
