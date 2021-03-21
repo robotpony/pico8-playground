@@ -13,17 +13,24 @@ p = plotter()
 
 -- it needs something to draw with
 t = tile(4, 4, 5)
+
+m = function(self)
+	-- needs thought
+end
+
+p:setMutator(m)
 p:setPen(t)
 p:start(0,0)
 p:stamp()
 p:right()
 p:stamp()
-p:evolve(1)
+p:mutate(1) -- mutate by step
 p:down()
 
 -- drawing can be fun
 
--- evolve? mutate? permiate? colour? <- specific feels better
+-- evolve? mutate? permeate? emerge?
+	- colour? <- specific feels better?
 -- direction (right(1))
 -- 
 
