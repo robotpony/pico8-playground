@@ -5,7 +5,6 @@ __lua__
 -- A hacky tile art prototype
 
 #include _tile.p8
-#include _plotter.p8
 
 t = {}
 
@@ -19,9 +18,10 @@ function _init()
 	t = tile()
 	t:setSeed(seed)
 
+	-- define a simple tile mutator
 	local mutedColours = function(self, first)
 
-		local clr = {15, 15, 15, 14, 13, 12, 6, 1, 143, 142, 141, 134}
+		local clr = {15, 14, 13, 12, 6, 1, 143, 142, 141, 134}
 		self.c = rnd(clr)
 
 		if first then return true end
@@ -46,12 +46,15 @@ function _init()
 end
 
 -- clock tick
-function _update()
+function _update60()
+	local l = t:lineLen()
+	for ii = 0, l * l, 1 do
+		t:stamp()
+	end
 end
 
 -- draw!
 function _draw()
-	t:stamp()
 end
 
 __gfx__

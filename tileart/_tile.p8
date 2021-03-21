@@ -22,6 +22,10 @@ function tile(w, h, colour)
 			return false
 		end,
 
+		lineLen = function(self)
+			return w_h_max / (self.w + self.p)
+		end,
+
 		-- reset position
 		reset = function(self)
 			self.x = 0
