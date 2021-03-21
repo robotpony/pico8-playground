@@ -16,6 +16,10 @@ t = tile(4, 4, 5)
 p:setPen(t)
 p:start(0,0)
 p:stamp()
+p:right()
+p:stamp()
+p:evolve(1)
+p:down()
 
 -- drawing can be fun
 

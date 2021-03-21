@@ -14,6 +14,9 @@ function _init()
 	print "starting ..."
 	
 	t = tile()
+	t:stamp()
+	t:stamp(4, 4, 10)
+	t:stamp(5, 5)
 end
 
 function _update()
