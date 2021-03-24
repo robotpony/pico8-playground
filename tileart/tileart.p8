@@ -21,12 +21,21 @@ function _init()
 	t:setSeed(seed)
 	l = t:lineLen()
 
+	greens = {11, 3, 0, 0}
+	reds = {0, 0, 8, 2}
+	muted = {15, 14, 13, 12, 6, 1}
+
+
 	-- define a simple tile mutator
 	local mutedColours = function(self, first)
 
-		-- pick a colour
-		local clr = {15, 14, 13, 12, 6, 1, 143, 142, 141, 134}
-		self.c = rnd(clr)
+		local col = self:col()
+
+		if (col % 2) == 1 then
+			self.c = rnd(greens)
+		else
+			self.c = rnd(reds)
+		end
 
 		if first then return true end
 
@@ -55,6 +64,10 @@ end
 
 -- clock tick
 function _update()
+	local b = btn()
+
+	if b == 16 then return end
+
 	-- generate all stamps per update
 	for ii = 0, l * l, 1 do
 		t:stamp()

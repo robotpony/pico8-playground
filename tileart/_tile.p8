@@ -7,14 +7,14 @@ w_h_max = 128
 
 function tile(w, h, colour)
 	local t = {
-		w = 6, h = 1, p = 2,
+		w = 8, h = 2, p = 0,
 		c,
 		x = 0, y = 0,
 
 		seed,
 
 		debug = false,
-		start_over = true,
+		start_over = false,
 		stop = false,
 
 		-- the default mutator does NOP
@@ -26,6 +26,14 @@ function tile(w, h, colour)
 			return w_h_max / (self.w + self.p)
 		end,
 
+		col = function(self)
+			if self.x == 0 then return 0 end
+
+			local colW = self.w + self.p
+
+			return self.x / colW
+		end,
+
 		-- reset position
 		reset = function(self)
 			self.x = 0
@@ -35,15 +43,9 @@ function tile(w, h, colour)
 		--
 		inBounds = function(self, dir)
 			if dir == 'x' then
-				if self.x > w_h_max then
-					return false
-				end
-				return true
+				return self.x <= w_h_max
 			elseif dir == 'y' then
-				if self.y > w_h_max then
-					return false
-				end
-				return true
+				return self.y <= w_h_max
 			end
 
 			return false
