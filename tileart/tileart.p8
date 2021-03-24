@@ -31,13 +31,15 @@ function _init()
 		if first then return true end
 
 		-- update the position per mutation, simple l->r
-		self.x = self.x + self.w + self.p
-		if self.x > w_h_max then
+
+		if self:inBounds('x') then
+			self.x = self.x + self.w + self.p
+		else
 			self.x = 0
 			self.y = self.y + self.h + self.p
 		end
 
-		if self.y > w_h_max then
+		if not self:inBounds('y') then
 			if self.start_over then
 				self:reset()
 			else

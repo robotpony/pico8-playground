@@ -7,7 +7,7 @@ w_h_max = 128
 
 function tile(w, h, colour)
 	local t = {
-		w = 2, h = 2, p = 2,
+		w = 6, h = 1, p = 2,
 		c,
 		x = 0, y = 0,
 
@@ -30,6 +30,23 @@ function tile(w, h, colour)
 		reset = function(self)
 			self.x = 0
 			self.y = 0
+		end,
+
+		--
+		inBounds = function(self, dir)
+			if dir == 'x' then
+				if self.x > w_h_max then
+					return false
+				end
+				return true
+			elseif dir == 'y' then
+				if self.y > w_h_max then
+					return false
+				end
+				return true
+			end
+
+			return false
 		end,
 
 		-- Take the next stamp step
