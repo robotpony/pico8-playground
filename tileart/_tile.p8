@@ -17,9 +17,12 @@ function tile(w, h, colour)
 		start_over = false,
 		stop = false,
 
-		-- the default mutator does NOP
-		mutator = function(self)
-			return false
+		mutators = {},
+
+		mutate = function(self, firstRun)
+			local fn = rnd(self.mutators)
+
+			return fn(self, firstRun)
 		end,
 
 		lineLen = function(self)
@@ -51,13 +54,18 @@ function tile(w, h, colour)
 			return false
 		end,
 
+		r = function(self)
+		end,
+		down = function(self)
+		end,
+
 		-- Take the next stamp step
 		next = function(self)
 			if self.stop then return false end
 
 			local firstRun = self.c == nil
 
-			if self:mutator(firstRun) then
+			if self:mutate(firstRun) then
 				return true
 			else
 				if self.start_over then
@@ -92,8 +100,8 @@ function tile(w, h, colour)
 
 		-- set a mutator iterator
 		--		future: allow multiple mutators
-		setMutator = function(self, f)
-			self.mutator = f
+		addMutator = function(self, f)
+			add(self.mutators, f)
 		end,
 
 		-- set a pattern function
