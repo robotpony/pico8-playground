@@ -21,7 +21,7 @@ gtia_dna = function(self, first)
 
 	-- update the position per mutation, simple l->r
 
-	if self:inBounds('x') then
+	if self:inBounds('x') then -- self.right() -> self.CR()
 		self.x = self.x + self.w + self.p
 	else
 		self.x = 0
