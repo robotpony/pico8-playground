@@ -12,7 +12,7 @@ function _init()
 	-- 0 title, 1 tut, 2 game, 3 gamex, 4 end
 	t.mode=1
 	
-	debug=1
+	debug=0
 	
 	msg={}
 	msg.text=''
@@ -313,7 +313,7 @@ function status_bar_draw()
  line(bx,by+7,bx+127,by+7,5)
  line(bx,by,bx+127,by,7)
  
- if (debug) then
+ if (debug==1) then
   p.keys=200
  	print('p'..p.x..','..p.y,bx+1,by+1)
  	print('m'..m.x..','..m.y,bx+32,by+1)

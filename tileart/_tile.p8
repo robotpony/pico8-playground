@@ -54,9 +54,13 @@ function tile(w, h, colour)
 			return false
 		end,
 
-		r = function(self)
+		left = function(self, n)
 		end,
-		down = function(self)
+		right = function(self, n)
+		end,
+		down = function(self, n)
+		end,
+		down = function(self, n)
 		end,
 
 		-- Take the next stamp step
