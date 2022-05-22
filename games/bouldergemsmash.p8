@@ -5,9 +5,9 @@ __lua__
 
 function _init()
 	-- [t]ime and timelines
- t={}
- t.now=time()
- t.last=t.now
+	t={}
+	t.now=time()
+	t.last=t.now
 	t.tick=0
 	t.pause=0
 	-- 0 title, 1 tut, 2 game, 3 gamex, 4 end
@@ -103,7 +103,7 @@ end
 -- map
 
 function map_init()
- -- sprite bits
+	-- sprite bits
 	solid=0
 	lock=1
 	falls=2
@@ -115,13 +115,13 @@ function map_init()
 	
 	-- special tiles
 	chest=46
- tnt=62
- door_keys={12,28}
- hp={11,27}
- lava={35,36}
- diamond={8,24}
- gold={9,25}
- ruby={10,26}
+	tnt=62
+	door_keys={12,28}
+	hp={11,27}
+	lava={35,36}
+	diamond={8,24}
+	gold={9,25}
+	ruby={10,26}
 	entrance=16
 	exit=32
 	
@@ -170,13 +170,13 @@ end
 
 function map_draw()
 	-- find map top/left
- m.x=flr(p.x/16)*16
- m.y=flr(p.y/15)*15
- -- set camera and draw
+	m.x=flr(p.x/16)*16
+	m.y=flr(p.y/15)*15
+	-- set camera and draw
 	m.pxx=m.x*8
 	m.pxy=m.y*8
- camera(m.pxx,m.pxy)
- map(0,0,0,0,128,128)
+	camera(m.pxx,m.pxy)
+	map(0,0,0,0,128,128)
 end
 
 -- is tile? (table or int)
@@ -188,10 +188,10 @@ function is(matches,tile)
 		return matches==tile
 	end
 
- if (mt!='table') return false
- 	
+	if (mt!='table') return false
+		
 	for _,t in pairs(matches) do
-  if (t==tile) return true
+	 if (t==tile) return true
 	end
 	
 	return false
@@ -311,7 +311,7 @@ function check_player_hp()
 		p.hp=0
 	else 
 		sfx(6)
- 	return true
+		return true
 	end
 	return false
 end
@@ -327,7 +327,7 @@ end
 function player_dig(x,y)
 
 	local tile = is_diggable(x,y)
- if (tile==nil) return false
+	if (tile==nil) return false
 
 	mset(x,y,0)
 	sfx(2)
@@ -337,7 +337,7 @@ end
 
 
 function player_trigger(x,y)
- local tile=mget(x,y)
+	local tile=mget(x,y)
 
 	if (is(chest,tile)) then
 		p.keys+=1
@@ -401,7 +401,7 @@ function set_p_dir(nx,ny)
 end
 
 function any_btn()
- return btnp()>0
+	return btnp()>0
 end
 -->8
 -- hud and popups
@@ -420,37 +420,38 @@ end
 
 function hud_draw()
 	-- hud sits on the screen bottom
- local bx=0+m.pxx
- local by=120+m.pxy
- 
- -- chrome
- rectfill(bx,by,bx+128,by+8,6)
- line(bx,by+7,bx+127,by+7,5)
- line(bx,by,bx+127,by,7)
- 
- if (debug==1) then
- end
- 
- -- hp
- print('♥'..p.hp,bx+1,by+1,1)
- 
- -- keys 
- local keys='🅾️'..p.keys
- local klen=#keys - 1
- local center=64-((klen/2)*6)-6
- print(keys,center,by+1,1)
- 
- -- score
- local score='★'..p.score
- local slen=#score
- local ralign=(bx+128)-(slen*6)
- print(score,ralign,by+1,1)
+	local bx=0+m.pxx
+	local by=120+m.pxy
+	
+	-- chrome
+	rectfill(bx,by,bx+128,by+8,6)
+	line(bx,by+7,bx+127,by+7,5)
+	line(bx,by,bx+127,by,7)
+	
+	if (debug==1) then
+	end
+	
+	-- hp
+	print('♥'..p.hp,bx+1,by+1,1)
+	
+	-- keys 
+	local keys='🅾️'..p.keys
+	local klen=#keys - 1
+	local center=64-((klen/2)*6)-6
+	print(keys,center,by+1,1)
+	
+	-- score
+	local score='★'..p.score
+	local slen=#score
+	local ralign=(bx+128)-(slen*6)
+	print(score,ralign,by+1,1)
 end
 
+-- tutorial popup
 function explain(text,x,y,tc)
+
 	p.hints+=1
 	if (t.mode==1) then
-		
 		if (p.hints>30) then
 			-- end tutorial			
 			t.mode=3
@@ -462,7 +463,7 @@ function explain(text,x,y,tc)
 	
 end
 
-
+-- show a message (auto pos)
 function popup(text,x,y,tc)
 	pause()
 	msg.text=text
