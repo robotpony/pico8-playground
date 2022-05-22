@@ -498,7 +498,28 @@ end
 
 
 -->8
--- explosions
+-- changelog
+
+-- version 0
+--  basic tiles
+--		basic map draw _ scrolling
+--  player movement/animation
+--  keys, chests, doors
+--  hp
+--  popups
+-- 	tutorial
+
+
+-- todo:
+-- 	loading screen
+-- 	falling gems and rocks
+--  splodey splodes
+--  combos
+--  falling lava
+-- 	level design
+--  sprite polish
+--  sound polish
+--  moozack?
 __gfx__
 000000000677000006770000444444444444444444444444444444444445554444444444444444444444444444444444444444440000000000000e00008e0e08
 00000000677777006777770099499949994999494d444444444444444556665444461444444794444446e4444884488444444444000000000000000080e00880
