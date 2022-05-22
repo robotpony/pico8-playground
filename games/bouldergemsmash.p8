@@ -4,26 +4,10 @@ __lua__
 -- boulder gem smash
 
 function _init()
-	-- [t]ime and timelines
-	t={}
-	t.now=time()
-	t.last=t.now
-	t.tick=0
-	t.pause=0
-	-- 0 title, 1 tut, 2 game, 3 gamex, 4 end
-	t.mode=1
-	
 	debug=0
 	
-	-- game messages
-	msg={}
-	msg.text=''
-	msg.x=20
-	msg.y=20
-	msg.c=7
-	msg.w=48
-	msg.h=24
-	
+	time_init()
+	hud_init()
 	map_init()
 	player_init()
 	gravity_init()
@@ -41,11 +25,9 @@ function _update()
 	else
 		player_move()
 	end
-	
 end
 
--- things done every second
-function do_every_second()
+function once_a_second()
 	-- warn player of low health
 	if (is_player_health_low()) then
 		sfx(5)
@@ -64,6 +46,18 @@ function _draw()
 	
 end
 
+function time_init()
+	-- [t]ime and timelines
+	t={}
+	t.now=time()
+	t.last=t.now
+	t.tick=0
+	t.pause=0
+	-- 0 title, 1 tut, 2 game, 3 gamex, 4 end
+	t.mode=1
+end
+
+
 function ticktock()
 	-- manage game ticks
 	
@@ -71,7 +65,8 @@ function ticktock()
 	if (t.now>(t.last+1)) then
 		t.tick=(t.tick+1)%2
 		t.last=t.now
-		do_every_second()
+		
+		once_a_second()
 	end
 end
 
@@ -401,6 +396,17 @@ function any_btn()
 end
 -->8
 -- hud and popups
+
+function hud_init()
+	-- game messages
+	msg={}
+	msg.text=''
+	msg.x=20
+	msg.y=20
+	msg.c=7
+	msg.w=48
+	msg.h=24
+end
 
 function popup_draw()
 	local xs=m.pxx+msg.x+6
