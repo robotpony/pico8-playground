@@ -30,13 +30,8 @@ function _init()
 end
 
 function _update()
-	t.now=time()
-	if(t.now>(t.last+1)) then
-		t.tick=(t.tick+1)%2
-		t.last=t.now
-		
-		do_every_second()
-	end
+
+	ticktock()
 	
 	if (game_over()) then
 		popup('so sad\nu dead',p.x,p.y,8)
@@ -69,6 +64,18 @@ function _draw()
 	
 end
 
+function ticktock()
+	-- manage game ticks
+	
+	t.now=time()
+	if(t.now>(t.last+1)) then
+		t.tick=(t.tick+1)%2
+		t.last=t.now
+		do_every_second()
+	end
+end
+
+
 function game_over()
 	if (t.mode>=4) then
 		t.paused=1
@@ -96,7 +103,7 @@ end
 -- map
 
 function map_init()
- -- sprite bitmap
+ -- sprite bits
 	solid=0
 	lock=1
 	falls=2
@@ -123,7 +130,7 @@ function map_init()
 	level=0
 	tutorial=1
 	
-	-- [m]ap things
+	-- [m]ap management
 	m={}
 	m.x=0
 	m.y=0
@@ -137,12 +144,12 @@ end
 function setup_map()
 	-- cached tile [l]ocations
 	l={}
+	-- start pos
 	l.sx=1
 	l.sy=1
+	-- exit pos
 	l.ex=126
 	l.ey=126
-
-	-- todo: refactor to use is()
 	
 	for x=1,128 do
 		for y=1,128 do
@@ -158,6 +165,7 @@ function setup_map()
 			
 		end
 	end
+	
 end
 
 function map_draw()
@@ -175,6 +183,7 @@ end
 function is(matches,tile)
 
 	local mt=type(matches)
+	
 	if (mt=='number') then
 		return matches==tile
 	end
@@ -226,7 +235,6 @@ function toggle_tile(x,y,to)
 	end
 
 	mset(x,y,toggle_to)
-
 	return toggle_to
 end
 -->8
@@ -520,6 +528,11 @@ end
 --  sprite polish
 --  sound polish
 --  moozack?
+
+
+-- bugs
+--   tick/hp death timing
+--   popups too quick   
 __gfx__
 000000000677000006770000444444444444444444444444444444444445554444444444444444444444444444444444444444440000000000000e00008e0e08
 00000000677777006777770099499949994999494d444444444444444556665444461444444794444446e4444884488444444444000000000000000080e00880
