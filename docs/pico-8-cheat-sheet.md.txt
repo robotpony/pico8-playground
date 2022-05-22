@@ -1,0 +1,21 @@
+# Pico-8 cheat sheet
+
+## quick start
+
+1. Save name.png (ignore warning, you can add these later)
+	- label is blank (add one in tab 1)
+	- run cart / F7 --> save label/screenshot
+	- hit escape to find editor
+2. Make some map tiles
+3. Make some tunes
+4. Make a map
+5. Start to code
+
+## Notes
+
+- Text characters are 6px wide
+- export filename.html (playable)
+
+## Commands
+
+- BTNP(k)
