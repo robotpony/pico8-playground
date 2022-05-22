@@ -68,7 +68,7 @@ function ticktock()
 	-- manage game ticks
 	
 	t.now=time()
-	if(t.now>(t.last+1)) then
+	if (t.now>(t.last+1)) then
 		t.tick=(t.tick+1)%2
 		t.last=t.now
 		do_every_second()
@@ -179,7 +179,7 @@ function map_draw()
 	map(0,0,0,0,128,128)
 end
 
--- is tile? (table or int)
+-- is tile? (set or single tile)
 function is(matches,tile)
 
 	local mt=type(matches)
@@ -274,14 +274,14 @@ function player_move()
 	elseif (btnp(⬆️)) then dy=-1
 	elseif (btnp(⬇️)) then dy=1
 	else
-	 set_p_dir(dx,dy) 
+	 set_player_direction(dx,dy) 
 		return 
 	end
 	
 	local nx=p.x+dx
 	local ny=p.y+dy
 	
-	set_p_dir(dx,dy)
+	set_player_direction(dx,dy)
 
 	if (can_activate(nx,ny)) then
 		player_trigger(nx,ny)
@@ -290,13 +290,12 @@ function player_move()
 	if (can_move_to(nx,ny)) then
 		player_move_to(nx,ny)
 
-	 if (t.tick) sfx(2)
+		if (t.tick) sfx(2)
 
 		player_dig(nx,ny)
 	else
-	 sfx(1)
+		sfx(1)
 	end
-	
 end
 
 function player_move_to(x,y)
@@ -305,7 +304,6 @@ function player_move_to(x,y)
 end
 
 function check_player_hp()
-
 	if (is_player_dead()) then
 		t.mode=4
 		p.hp=0
@@ -333,8 +331,6 @@ function player_dig(x,y)
 	sfx(2)
 	p.score+=1
 end
-
-
 
 function player_trigger(x,y)
 	local tile=mget(x,y)
@@ -393,7 +389,7 @@ function player_trigger(x,y)
 	return false
 end
 
-function set_p_dir(nx,ny)
+function set_player_direction(nx,ny)
 	if (nx==1) p.sprite=p.sprites[1]
 	if (nx==-1) p.sprite=p.sprites[2]
 	if (ny==1) p.sprite=p.sprites[3]
@@ -449,7 +445,6 @@ end
 
 -- tutorial popup
 function explain(text,x,y,tc)
-
 	p.hints+=1
 	if (t.mode==1) then
 		if (p.hints>30) then
