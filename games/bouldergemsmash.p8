@@ -407,10 +407,10 @@ end
 -- hud and popups
 
 function popup_draw()
-	xs=m.pxx+msg.x+6
-	xe=m.pxx+msg.x+msg.w
-	ys=m.pxy+msg.y+6
-	ye=m.pxy+msg.y+msg.h
+	local xs=m.pxx+msg.x+6
+	local xe=m.pxx+msg.x+msg.w
+	local ys=m.pxy+msg.y+6
+	local ye=m.pxy+msg.y+msg.h
 	
 	rect(xs+1,ys+1,xe+1,ye+1,1)
 	rectfill(xs,ys,xe,ye,0)
@@ -419,30 +419,31 @@ function popup_draw()
 end
 
 function hud_draw()
- bx=0+m.pxx
- by=120+m.pxy
+	-- hud sits on the screen bottom
+ local bx=0+m.pxx
+ local by=120+m.pxy
  
+ -- chrome
  rectfill(bx,by,bx+128,by+8,6)
  line(bx,by+7,bx+127,by+7,5)
  line(bx,by,bx+127,by,7)
  
  if (debug==1) then
-  p.keys=200
- 	print('p'..p.x..','..p.y,bx+1,by+1)
- 	print('m'..m.x..','..m.y,bx+32,by+1)
- 	return
  end
  
+ -- hp
  print('♥'..p.hp,bx+1,by+1,1)
  
- keys='🅾️'..p.keys
- klen=#keys - 1
- center=64-((klen/2)*6)-6
+ -- keys 
+ local keys='🅾️'..p.keys
+ local klen=#keys - 1
+ local center=64-((klen/2)*6)-6
  print(keys,center,by+1,1)
  
- score='★'..p.score
- slen=#score
- ralign=(bx+128)-(slen*6)
+ -- score
+ local score='★'..p.score
+ local slen=#score
+ local ralign=(bx+128)-(slen*6)
  print(score,ralign,by+1,1)
 end
 
@@ -531,8 +532,8 @@ end
 
 
 -- bugs
---   tick/hp death timing
---   popups too quick   
+--   tick/hp death timing bug
+--   popups too quick (add countdown?)   
 __gfx__
 000000000677000006770000444444444444444444444444444444444445554444444444444444444444444444444444444444440000000000000e00008e0e08
 00000000677777006777770099499949994999494d444444444444444556665444461444444794444446e4444884488444444444000000000000000080e00880
