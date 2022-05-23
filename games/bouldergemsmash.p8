@@ -5,7 +5,7 @@ __lua__
 
 function _init()
 	debug=0
-	
+
 	time_init()
 	hud_init()
 	map_init()
@@ -15,13 +15,13 @@ end
 
 function _update()
 
-	ticktock()
-	
+	tick()
+
 	if (game_over()) then
 		popup('so sad\nu dead',p.x,p.y,8)
 		player_wait()
 	elseif (paused()) then
-		player_wait()		
+		player_wait()
 	else
 		player_move()
 	end
@@ -32,7 +32,7 @@ function once_a_second()
 	if (is_player_health_low()) then
 		sfx(5)
 	end
-	
+
 	-- gravity is slow
 	update_falling_blox()
 end
@@ -40,14 +40,14 @@ end
 function _draw()
 	cls()
 	map_draw()
-	player_draw()
-	draw_falling_blox()
 	hud_draw()
-		
+	draw_falling_blox()
+	player_draw()
+
 	if (paused()) then
 		popup_draw()
 	end
-	
+
 end
 
 function time_init()
@@ -61,19 +61,17 @@ function time_init()
 	t.mode=1
 end
 
-
-function ticktock()
+function tick()
 	-- manage game ticks
-	
+
 	t.now=time()
 	if (t.now>(t.last+1)) then
 		t.tick=(t.tick+1)%2
 		t.last=t.now
-		
+
 		once_a_second()
 	end
 end
-
 
 function game_over()
 	if (t.mode>=4) then
@@ -96,8 +94,6 @@ function unpause()
 	t.pause=0
 end
 
-
-
 -->8
 -- map
 
@@ -111,7 +107,7 @@ function map_init()
 	no_dig=5
 	hpinc=6
 	hpdec=7
-	
+
 	-- special tiles
 	chest=46
 	tnt=62
@@ -124,11 +120,11 @@ function map_init()
 	rocks={7,23}
 	entrance=16
 	exit=32
-	
+
 	-- basic state
 	level=0
 	tutorial=1
-	
+
 	-- [m]ap management
 	m={}
 	m.x=0
@@ -137,25 +133,25 @@ function map_init()
 	m.pxy=0
 	m.max_x=128
 	m.max_y=64
-	
+
 	setup_map()
-		
+
 end
 
 function setup_map()
 	-- cached tile [l]ocations
 	l={}
-	-- start pos
+	-- start tile pos
 	l.sx=1
 	l.sy=1
-	-- exit pos
+	-- exit tile pos
 	l.ex=126
 	l.ey=126
-	
+
 	for x=1,m.max_x do
 		for y=1,m.max_y do
 			mt=mget(x,y)
-			
+
 			if (is(entrance,mt)) then
 				l.sx=x
 				l.sy=y
@@ -163,16 +159,15 @@ function setup_map()
 				l.ex=x
 				l.ey=y
 			end
-			
 		end
 	end
-	
 end
 
 function map_draw()
 	-- find map top/left
 	m.x=flr(p.x/16)*16
 	m.y=flr(p.y/15)*15
+
 	-- set camera and draw
 	m.pxx=m.x*8
 	m.pxy=m.y*8
@@ -184,17 +179,17 @@ end
 function is(matches,tile)
 
 	local mt=type(matches)
-	
+
 	if (mt=='number') then
 		return matches==tile
 	end
 
 	if (mt!='table') return false
-		
+
 	for _,t in pairs(matches) do
 	 if (t==tile) return true
 	end
-	
+
 	return false
 end
 
@@ -225,8 +220,6 @@ function can_destroy(x,y)
 	return is_tile(destroys,x,y)
 end
 
-
-
 function is_diggable(x,y)
 	if (is_tile(no_dig,x,y)) return
 	return mget(x,y)
@@ -235,116 +228,18 @@ end
 function toggle_tile(x,y,to)
 	local tile=mget(x,y)
 	local toggle_to=to
-	
+
 	if (to==nil) then
 		toggle_to=tile+1
-	else 
+	else
 		toggle_to=to
 	end
 
 	mset(x,y,toggle_to)
 	return toggle_to
 end
--->8
--- player
 
-function player_init()
-	p={}
-	--
-	p.x=l.sx
-	p.y=l.sy
-	-- r,l,d,u
-	p.sprites={1,17,33,49}
-	p.sprite=p.sprites[1]
-	
-	p.hp=3
-	p.keys=0
-	p.score=0
-	p.hints=0
-end
-
-function player_draw()
-	spr(p.sprite+t.tick,p.x*8,p.y*8)
-end
-
-function player_wait()
-	if (any_btn()) then
-		unpause()
-	end
-end
-
-function player_move()
-	local dx=0
-	local dy=0
-	
-	if (btnp(⬅️)) then dx=-1 
-	elseif (btnp(➡️)) then dx=1
-	elseif (btnp(⬆️)) then dy=-1
-	elseif (btnp(⬇️)) then dy=1
-	else
-	 set_player_direction(dx,dy) 
-		return 
-	end
-	
-	local nx=p.x+dx
-	local ny=p.y+dy
-	
-	set_player_direction(dx,dy)
-
-	if (can_activate(nx,ny)) then
-		player_trigger(nx,ny)
-	end
-	
-	if (can_move_to(nx,ny)) then
-		player_move_to(nx,ny)
-
-		if (t.tick) sfx(2)
-
-		player_dig(nx,ny)
-	else
-		sfx(1)
-	end
-	
-	if (dislodge_above(nx,ny)) then
-		explain('what have\nu done?',nx,ny)
-	end
-end
-
-function player_move_to(x,y)
-	 p.x=mid(0,x,127)
-	 p.y=mid(0,y,127)
-end
-
-function check_player_hp()
-	if (is_player_dead()) then
-		t.mode=4
-		p.hp=0
-	else 
-		sfx(6)
-		return true
-	end
-	return false
-end
-
-function is_player_health_low()
-	return (p.hp < 3 and p.hp > 0)
-end
-
-function is_player_dead()
-	return (p.hp<=0)
-end
-
-function player_dig(x,y)
-
-	local tile = is_diggable(x,y)
-	if (tile==nil) return false
-
-	mset(x,y,0)
-	sfx(2)
-	p.score+=1
-end
-
-function player_trigger(x,y)
+function map_trigger(x,y)
 	local tile=mget(x,y)
 
 	if (is(chest,tile)) then
@@ -370,7 +265,7 @@ function player_trigger(x,y)
 	elseif (is(door_keys,tile)) then
 		p.keys+=1
 		p.score+=10
-		player_dig(x,y)	
+		player_dig(x,y)
 		sfx(0)
 		explain('keys open\ndoors',x,y)
 		return true
@@ -382,7 +277,6 @@ function player_trigger(x,y)
 		explain('♥s give\nu health',x,y)
 		return true
 	elseif can_unlock(x,y) then
-	
 		if (p.keys > 0) then
 			p.keys=flr(p.keys-1)
 			sfx(0)
@@ -391,14 +285,120 @@ function player_trigger(x,y)
 		else
 			sfx(1)
 		end
-		
 	elseif (is(tnt,tile)) then
 		explain('be very\ncareful',x,y,8)
 	else
 		sfx(2)
 	end
-	
+
 	return false
+end
+-->8
+-- player
+
+function player_init()
+	p={}
+	--
+	p.x=l.sx
+	p.y=l.sy
+	-- r,l,d,u
+	p.sprites={1,17,33,49}
+	p.sprite=p.sprites[1]
+
+	p.hp=3
+	p.keys=0
+	p.score=0
+	p.hints=0
+	p.hit=0
+end
+
+function player_draw()
+	spr(p.sprite+t.tick,p.x*8,p.y*8)
+end
+
+function player_wait()
+	if (any_btn()) then
+		unpause()
+	end
+end
+
+function player_move()
+	local dx=0
+	local dy=0
+
+	if (btnp(⬅️)) then dx=-1
+	elseif (btnp(➡️)) then dx=1
+	elseif (btnp(⬆️)) then dy=-1
+	elseif (btnp(⬇️)) then dy=1
+	else
+		set_player_direction(dx,dy)
+		return
+	end
+
+	local nx=p.x+dx
+	local ny=p.y+dy
+
+	set_player_direction(dx,dy)
+
+	if (can_activate(nx,ny)) then
+		map_trigger(nx,ny)
+	end
+
+	if (can_move_to(nx,ny)) then
+		player_move_to(nx,ny)
+
+		if (t.tick) sfx(2)
+
+		player_dig(nx,ny)
+	else
+		sfx(1)
+	end
+
+	if (dislodge_above(nx,ny)) then
+		explain('what have\nu done?',nx,ny)
+	end
+end
+
+function player_move_to(x,y)
+	 p.x=mid(0,x,127)
+	 p.y=mid(0,y,127)
+end
+
+function hits_player(x,y)
+	if (x==p.x and y==p.y) then
+		p.hit+=1 -- todo
+		return true
+	else
+		return false
+	end
+end
+
+function check_player_hp()
+	if (is_player_dead()) then
+		t.mode=4
+		p.hp=0
+	else
+		sfx(6)
+		return true
+	end
+	return false
+end
+
+function is_player_health_low()
+	return (p.hp < 3 and p.hp > 0)
+end
+
+function is_player_dead()
+	return (p.hp<=0)
+end
+
+function player_dig(x,y)
+	local tile = is_diggable(x,y)
+	if (tile==nil) return false
+
+	mset(x,y,0)
+	sfx(2)
+	p.score+=1
 end
 
 function set_player_direction(nx,ny)
@@ -430,79 +430,70 @@ function popup_draw()
 	local xe=m.pxx+msg.x+msg.w
 	local ys=m.pxy+msg.y+6
 	local ye=m.pxy+msg.y+msg.h
-	
+	-- draw window
 	rect(xs+1,ys+1,xe+1,ye+1,1)
 	rectfill(xs,ys,xe,ye,0)
 	rect(xs,ys,xe,ye,msg.c)
+	-- show text
 	print(msg.text,xs+4,ys+4,msg.c)
 end
 
 function hud_draw()
-	-- hud sits on the screen bottom
+	-- hud sits on screen bottom
 	local bx=0+m.pxx
 	local by=120+m.pxy
-	
-	-- chrome
+
+	-- draw chrome
 	rectfill(bx,by,bx+128,by+8,6)
 	line(bx,by+7,bx+127,by+7,5)
 	line(bx,by,bx+127,by,7)
-	
+
 	if (debug==1) then
+		-- todo
 	end
-	
-	-- hp
+
+	-- show hp
 	print('♥'..p.hp,bx+1,by+1,1)
-	
-	-- keys 
+
+	-- show keys
 	local keys='🅾️'..p.keys
 	local klen=#keys - 1
 	local center=64-((klen/2)*6)-6
 	print(keys,center,by+1,1)
-	
-	-- score
+
+	-- show score
 	local score='★'..p.score
 	local slen=#score
 	local ralign=(bx+128)-(slen*6)
 	print(score,ralign,by+1,1)
 end
 
--- tutorial popup
+-- show tutorial popup
 function explain(text,x,y,tc)
 	p.hints+=1
 	if (t.mode==1) then
-		if (p.hints>30) then
-			-- end tutorial			
+		if (p.hints>30) then -- todo
+			-- tutorial done
 			t.mode=3
 			popup('you\'re on\nyour own',x,y,9)
 		else
-					popup(text,x,y,tc)
+			popup(text,x,y,tc)
 		end
 	end
-	
 end
 
 -- show a message (auto pos)
 function popup(text,x,y,tc)
 	pause()
 	msg.text=text
-	
-	if (x<9) then 
-		msg.x=(x*8)+4
-	else 
-		msg.x=x
-	end
-	
-	if (y<9) then 
-		msg.y=(y*8)+4
-	else
-		msg.y=y
-	end
-	
-	if (tc==nil) then 
-		msg.c=7
-	else 
-		msg.c=tc
-	end
+	-- set hacky popup pos
+	if (x<9) then msg.x=(x*8)+4
+	else msg.x=x end
+	if (y<9) then msg.y=(y*8)+4
+	else msg.y=y end
+	-- set colour
+	if (tc==nil) then msg.c=7
+	else msg.c=tc end
 end
 
 -->8
@@ -510,8 +501,9 @@ end
 
 function falling_blox_init()
 	-- [b]lox subject to gravity
-	b={}
-	b.falling={}
+	blox={}
+	blox.falling={}
+	blox.splodes={}
 end
 
 function update_falling_blox()
@@ -519,30 +511,53 @@ function update_falling_blox()
 end
 
 function drop_one_step()
-	for i, block in pairs(b.falling) do
-		local nx=block.x+block.dx
-		local ny=block.y+block.dy
-		
+	for i, b in pairs(blox.falling) do
+
+		local nx=b.x+b.dx
+		local ny=b.y+b.dy
+		local back2map=true -- todo
+
+		if (nx==nil or ny==nil) return false
+
+		-- b4 moving check block ⬆️
+		dislodge_above(b.x,b.y)
+
 		if (can_move_to(nx,ny)) then
-			b.falling[i].y=ny
-		else
-		 -- todo: need to put back into map
-			b.falling[i]=nill
-		end
-		
-		if (can_destroy(nx,ny)) then
+
+			-- update fall pos
+			blox.falling[i].y=ny
+			blox.falling[i].x=nx
+
+			if (hits_player(nx,ny)) then
+				popup('player hit\n'..b.t,p.x,p.y)
+			end
+
+		elseif(can_destroy(nx,ny)) then
+
+			add(blox.splode,b) -- todo
+			mset(b.x,b.y,0)
+			deli(blox.falling,i)
+
+			popup('destroy:\n'..nx..','..ny,nx,ny)
+
+		else -- stop falling
+			if (deli(blox.falling,i)) then
+				-- add back to map
+				if (back2map) mset(b.x,b.y,b.t)
+			end
 		end
 	end
-end 
+end
 
 function kaboom_check()
 end
 
-
 function draw_falling_blox()
-	for b in all(b.falling) do
-			spr(b.block,b.x*8,b.y*8)
+	for b in all(blox.falling) do
+			spr(b.t,b.x*8,b.y*8)
 	end
+
+	-- todo explosions
 end
 
 function dislodge_above(x,y,move_x,move_y)
@@ -552,31 +567,26 @@ function dislodge_above(x,y,move_x,move_y)
 	local y_above=flr(y-1)
 
 	-- dislodge a block
-	
 
 	if (can_fall(x,y_above)) then
-			
+
 		-- block is now "falling"
 
-		local block=mget(x,y_above)
-		local fb={}
-	
-		fb.x=x
-		fb.y=y_above
-		fb.block=block
-		fb.dx=dx
-		fb.dy=dy
-		
-		add(b.falling,fb)
+		local tile=mget(x,y_above)
+		local b={}
+		b.x=x
+		b.y=y_above
+		b.t=tile
+		b.dx=dx
+		b.dy=dy
+
+		add(blox.falling,b)
 		mset(x,y_above,0)
 		return true
 	end
-	
+
 	return false
 end
-
-
-
 
 -->8
 -- changelog
@@ -589,11 +599,10 @@ end
 --  hp
 --  popups
 -- 	tutorial
+-- 	falling gems and rocks
 
 
 -- todo:
--- 	loading screen
--- 	falling gems and rocks
 --  splodey splodes
 --  combos
 --  falling lava
@@ -601,11 +610,17 @@ end
 --  sprite polish
 --  sound polish
 --  moozack?
+-- 	loading screen
+-- 	player hit by falling
+-- 	add debug tools (maybe)
+--	add config for hint-max
+--  figure out back2map
+
 
 
 -- bugs
 --   tick/hp death timing bug
---   popups too quick (add countdown?)   
+--   popups too quick (add countdown?)
 __gfx__
 00000000067700000677000044444444444444444444444444444444444ddd4444444444444444444444444444444444444444440000000000000e00008e0e08
 00000000677777006777770099499949994999494d444444444444444dd777d444461444444794444446e4444884488444444444000000000000000080e00880
@@ -614,7 +629,7 @@ __gfx__
 0007700006eeeee0067eeeee44444444445005444444444444444444d677777d46cccc1447aaaa94468888e4e88888885055555400008000000e8000084e8800
 0070070067777e00677770e09949994999555549444d444444444444d66766d4446cc144447aa94444688e444e8888845554455400800000e08e00e0e88ee0e4
 000000000700700007007000444444444444444444444444444444444d666d4444461444444794444446e44444e88844444444440000000000000000008008e0
-0000000007707700077077004999499949994999444444444444444444ddd444444444444444444444444444444ee444444444440000000000e0000080e8e008
+0000000007700700007077004999499949994999444444444444444444ddd444444444444444444444444444444ee444444444440000000000e0000080e8e008
 511551150000776000007760dddddddddddddddd6666666666666666666ddd666666666666666666666666666666666666666666000000000000000000090000
 11511511007777760077777655d555d555d555d56d666666666666666dd777d666671666666796666667e6666886688666666666000000000000000009099090
 1511115100c0c0c600c0c0c6dddddddddd6666dd66666d6666666666d777677d667cc166667aa96666788e66e8888788666666660000000000a00a0000a00a00
@@ -622,22 +637,22 @@ __gfx__
 511511150eeeee60eeeee760dddddddddd6006dd6666666666666666d677777d67cccc1667aaaa96678888e6e8888888505555560000a0000009a0000909a099
 1511115100e777760e07777655d555d5556666d5666d666666666666d66766d6667cc166667aa96666788e666e888886555665560000000000a00a0000a00a00
 115115110007007000070070dddddddddddddddd66666666666666666d666d6666671666666796666667e66666e8886666666666000000000000000009099090
-511551150077077000770770d555d555d555d555666666666666666666ddd666666666666666666666666666666ee66666666666000000000000000000009000
+511551150070077000770700d555d555d555d555666666666666666666ddd666666666666666666666666666666ee66666666666000000000000000000009000
 88888888066606000666060099999999999999990000000000000000000ddd000000000000000000000000000000000000000000000000005444444554444445
-8eeeeee867c7677767c76777999999999aa999ee00000000000000000dd777d000071000000790000007e0000000000000000000000000004999999441111114
+8eeeeee867c7677067c76777999999999aa999ee00000000000000000dd777d000071000000790000007e0000000000000000000000000004999999441111114
 8e8888e87707e707770777079999999999ee9aa90000000000000000d777677d007cc100007aa90000788e000000000000000000000000004994499441111114
 8e8ee8e877c7e70077c7e70099999999999999990000000000000000d677777d07cccc1007aaaa90078888e00000000000000000000000005550055511111111
-8e8ee8e80707e7770707e77799999999999999990000000000000000d677777d07cccc1007aaaa90078888e00000000000000000000000004944449449444494
+8e8ee8e80707e7770707e77099999999999999990000000000000000d677777d07cccc1007aaaa90078888e00000000000000000000000004944449449444494
 8e8888e807ceee0707c0e0079999999999a99ee90000000000000000d66766d0007cc100007aa90000788e000000000000000000000000004949949449499494
 8eeeeee80000e000000eee00999999999ee999aa00000000000000000d666d0000071000000790000007e0000000000000000000000000004949949449499494
 88888888000000000000e0009999999999999999000000000000000000ddd0000000000000000000000000000000000000000000000000004444444444444444
 1111cccc00000000000e0000cccccccccccccccc0000000000000000000000000000000000000000000000000000000000000000000000008e8e8e8e8000000e
 1551c66c000e000000eee000cccccccc66cccccc0000000000000000000000000000000000000000000000000000000000000000000000008e8e8e8e8e8e8e8e
 1555666c70eeec70700e0c70cccccccccddccccc0000000000000000000000000000000000000000000000000000000000000000000000005555555585858585
-1151c6cc777e7070777e7070cccccccccccccccc000000000000000000000000000000000000000000000000000000000000000000000000ddd55dddddd55ddd
+1151c6cc777e7070077e7070cccccccccccccccc000000000000000000000000000000000000000000000000000000000000000000000000ddd55dddddd55ddd
 cc6c1511007e7c77007e7c77cccccccccccccccc0000000000000000000000000000000000000000000000000000000000000000000000005d5dd5d55d5dd5d5
 c6665551707e707770777077cccccccccccc66cc0000000000000000000000000000000000000000000000000000000000000000000000005d5dd5d58d8d8585
-c66c155177767c7677767c76cccccccccccccddc0000000000000000000000000000000000000000000000000000000000000000000000008e8e8e8e8e8e8e8e
+c66c155107767c7677767c76cccccccccccccddc0000000000000000000000000000000000000000000000000000000000000000000000008e8e8e8e8e8e8e8e
 cccc11110060666000606660cccccccccccccccc0000000000000000000000000000000000000000000000000000000000000000000000008e8e8e8e8000000e
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
