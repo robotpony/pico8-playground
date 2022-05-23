@@ -2,20 +2,51 @@
 
 ## quick start
 
-1. Save name.png (ignore warning, you can add these later)
-	- label is blank (add one in tab 1)
-	- run cart / F7 --> save label/screenshot
-	- hit escape to find editor
-2. Make some map tiles
-3. Make some tunes
-4. Make a map
-5. Start to code
+At the prompt:
 
-## Notes
+> save project-name (ignore warning)
+			(and at any time, F7 --> save label screenshot)
+			
+Hit escape to find editor
+
+## Random tips
+
+## Random facts
 
 - Text characters are 6px wide
-- export filename.html (playable)
+> export filename.html (playable html version)
 
-## Commands
+- display: 128x128px, semi-fixed 16 colour palette
+- cartridge size: 32k
+- cartridge format: png <-- this is pretty wild
+- input: 6 buttons for each player (2p)
+- sound: 4 channel, 64 definable chip sequences
+- code: lua, 8192 tokens of code
+- sprites: 1 bank of 128 8x8px sprites + 128 shared with map
+- map: 128x64 tiles (128x32 8-bit cels + 128x32 shared)
 
-- BTNP(k)
+## Lua lang + Pico-8 APIs
+
+Map:
+
+	mset(x,y,tile)
+	local t=mget(x,y)
+
+Tables:
+
+	-- init
+	tbl={}
+	tbl.prop=12
+	
+
+	-- delete at index
+	deli(ii,tbl)
+	
+
+Player controls:
+
+	btnp(k)
+
+
+can_move_to
+can_destroy
