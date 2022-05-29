@@ -4,8 +4,6 @@ __lua__
 -- boulder gem smash
 
 function _init()
-	debug=0
-
 	time_init()
 	hud_init()
 	map_init()
@@ -17,9 +15,17 @@ function _update()
 
 	tick()
 
-	if (game_over()) then
-		popup('so sad\nu dead',p.x,p.y,8)
-		player_wait()
+	if (is_pre_game()) then
+		local title_text={
+			'✽ boulder gem ✽',
+			'✽ smash ✽✽✽✽ '
+		}
+
+	 modal(title_text)
+		player_wait(3)
+	elseif (game_over()) then
+		modal('✽ game over ✽')
+		player_wait(0)
 	elseif (paused()) then
 		player_wait()
 	else
@@ -39,59 +45,22 @@ end
 
 function _draw()
 	cls()
-	map_draw()
-	hud_draw()
-	draw_falling_blox()
-	player_draw()
-
-	if (paused()) then
-		popup_draw()
-	end
-
-end
-
-function time_init()
-	-- [t]ime and timelines
-	t={}
-	t.now=time()
-	t.last=t.now
-	t.tick=0
-	t.pause=0
-	-- 0 title, 1 tut, 2 game, 3 gamex, 4 end
-	t.mode=1
-end
-
-function tick()
-	-- manage game ticks
-
-	t.now=time()
-	if (t.now>(t.last+1)) then
-		t.tick=(t.tick+1)%2
-		t.last=t.now
-
-		once_a_second()
-	end
-end
-
-function game_over()
-	if (t.mode>=4) then
-		t.paused=1
-		return true
+	if (is_pre_game()) then
+		modal_draw()
+	elseif (is_game_over()) then
+		modal_draw()
 	else
-		return false
+		-- game on!
+		map_draw()
+		hud_draw()
+		draw_falling_blox()
+		player_draw()
+
+		if (paused()) then
+			popup_draw()
+		end
+
 	end
-end
-
-function paused()
-	return t.pause==1
-end
-
-function pause()
-	t.pause=1
-end
-
-function unpause()
-	t.pause=0
 end
 
 -->8
@@ -239,8 +208,9 @@ function toggle_tile(x,y,to)
 	return toggle_to
 end
 
-function map_trigger(x,y)
-	local tile=mget(x,y)
+function map_trigger(x,y,t)
+	-- t is optional (to check manually)
+	local tile=t or mget(x,y)
 
 	if (is(chest,tile)) then
 		p.keys+=1
@@ -316,9 +286,12 @@ function player_draw()
 	spr(p.sprite+t.tick,p.x*8,p.y*8)
 end
 
-function player_wait()
+function player_wait(next_mode)
 	if (any_btn()) then
 		unpause()
+		if (next_mode) then
+			t.mode=next_mode
+		end
 	end
 end
 
@@ -355,7 +328,8 @@ function player_move()
 	end
 
 	if (dislodge_above(nx,ny)) then
-		explain('what have\nu done?',nx,ny)
+		explain('something\nfalls',p.x,p.y)
+		sfx(0)
 	end
 end
 
@@ -365,12 +339,8 @@ function player_move_to(x,y)
 end
 
 function hits_player(x,y)
-	if (x==p.x and y==p.y) then
-		p.hit+=1 -- todo
-		return true
-	else
-		return false
-	end
+	if (x==p.x and y==p.y) return true
+	return false
 end
 
 function check_player_hp()
@@ -411,6 +381,171 @@ end
 function any_btn()
 	return btnp()>0
 end
+
+-->8
+-- falling blox
+
+function falling_blox_init()
+	-- [b]lox subject to gravity
+	blox={}
+	blox.falling={}
+	blox.splodes={}
+end
+
+function update_falling_blox()
+	drop_one_step()
+end
+
+function drop_one_step()
+	for i, b in pairs(blox.falling) do
+
+		local nx=b.x+b.dx
+		local ny=b.y+b.dy
+
+		if (nx==nil or ny==nil) return false
+
+		-- dislodge block above
+		dislodge_above(b.x,b.y)
+
+		if (can_move_to(nx,ny)) then
+
+			if (hits_player(nx,ny)) then
+				-- todo: can_hurt
+				-- todo: can_still_fall
+				p.hp-=.25
+				sfx(4)
+			else
+				-- fall
+				blox.falling[i].y=ny
+				blox.falling[i].x=nx
+			end
+
+		elseif(can_destroy(nx,ny)) then
+
+			add(blox.splode,b) -- todo
+			mset(b.x,b.y,0)
+			deli(blox.falling,i)
+
+		else -- stop falling
+			if (deli(blox.falling,i)) then
+
+				if (can_destroy(b.x,b.y)) then
+					map_trigger(b.x,b.y,b.t)
+					mset(b.x,b.y,0)
+					deli(blox.falling,i)
+				else
+					-- add back to map
+					mset(b.x,b.y,b.t)
+				end
+			end
+		end
+	end
+end
+
+function draw_falling_blox()
+	for b in all(blox.falling) do
+			spr(b.t,b.x*8,b.y*8)
+	end
+
+	-- todo explosions
+end
+
+function dislodge_above(x,y,move_x,move_y)
+
+	local dx=move_x or 0 -- no change
+	local dy=move_y or 1 -- down
+	local y_above=flr(y-1)
+
+	-- dislodge a block
+
+	if (can_fall(x,y_above)) then
+
+		-- block is now "falling"
+
+		local tile=mget(x,y_above)
+		local b={}
+		b.x=x
+		b.y=y_above
+		b.t=tile
+		b.dx=dx
+		b.dy=dy
+
+		add(blox.falling,b)
+		mset(x,y_above,0)
+
+		printh(b.t..': '..b.x..','..b.y)
+		return true
+	end
+
+	return false
+end
+-->8
+-- time ⧗
+
+function time_init()
+	-- [t]ime and timelines
+	t={}
+	t.now=time()
+	t.last=t.now
+	t.tick=0
+	t.pause=0
+	-- 0 title, 1 tut, 2 game, 3 gamex, 4 end
+	t.mode=0
+end
+
+function tick()
+	-- manage game ticks
+
+	t.now=time()
+	if (t.now>(t.last+1)) then
+		t.tick=(t.tick+1)%2
+		t.last=t.now
+
+		once_a_second()
+	end
+end
+
+function paused()
+	return t.pause==1
+end
+
+function pause()
+	t.pause=1
+end
+
+function unpause()
+	t.pause=0
+end
+
+function is_pre_game()
+	return t.mode==0
+end
+
+function is_tutelage()
+	return t.mode==1
+end
+
+function is_main_game()
+	return t.mode==3
+end
+
+function is_extended_game()
+	return t.mode==4
+end
+
+function is_game_over()
+	return t.mode==5
+end
+
+function game_over()
+	if (is_game_over()) then
+		t.paused=1
+		return true
+	else
+		return false
+	end
+end
+
 -->8
 -- hud and popups
 
@@ -423,6 +558,47 @@ function hud_init()
 	msg.c=7
 	msg.w=48
 	msg.h=24
+
+	modal_msg={}
+	modal_msg.text=''
+	modal_msg.any_key=false
+
+	blink_c=1
+end
+
+function modal_draw()
+	local xs=0
+	local xe=127
+	local ys=0
+	local ye=127
+	local bc=1
+	local bgc=2
+	local tc=7
+	local tx=flr(xe/5)
+	local ty=flr(ye/3)
+	local text=modal_msg.text
+
+	rect(xs,ys,xe,ye,bgc)
+	rect(xs+2,ys+2,xe-2,ye-2,bgc)
+	rectfill(xs+4,ys+4,xe-4,ye-4,bc)
+
+	if (type(t)=='table') then
+		for _,t in pairs(text) do
+				print(t,tx,ty,tc)
+				ty+=6
+		end
+	else
+		print(text,tx,ty,tc)
+	end
+
+	ty+=18
+	print('press any key',tx,ty,blink())
+end
+
+function blink()
+	blink_c+=1
+	if (blink_c>7) blink_c=1
+	return blink_c
 end
 
 function popup_draw()
@@ -434,6 +610,7 @@ function popup_draw()
 	rect(xs+1,ys+1,xe+1,ye+1,1)
 	rectfill(xs,ys,xe,ye,0)
 	rect(xs,ys,xe,ye,msg.c)
+
 	-- show text
 	print(msg.text,xs+4,ys+4,msg.c)
 end
@@ -447,10 +624,6 @@ function hud_draw()
 	rectfill(bx,by,bx+128,by+8,6)
 	line(bx,by+7,bx+127,by+7,5)
 	line(bx,by,bx+127,by,7)
-
-	if (debug==1) then
-		-- todo
-	end
 
 	-- show hp
 	print('♥'..p.hp,bx+1,by+1,1)
@@ -496,96 +669,10 @@ function popup(text,x,y,tc)
 	else msg.c=tc end
 end
 
--->8
--- falling blox
-
-function falling_blox_init()
-	-- [b]lox subject to gravity
-	blox={}
-	blox.falling={}
-	blox.splodes={}
-end
-
-function update_falling_blox()
-	drop_one_step()
-end
-
-function drop_one_step()
-	for i, b in pairs(blox.falling) do
-
-		local nx=b.x+b.dx
-		local ny=b.y+b.dy
-		local back2map=true -- todo
-
-		if (nx==nil or ny==nil) return false
-
-		-- b4 moving check block ⬆️
-		dislodge_above(b.x,b.y)
-
-		if (can_move_to(nx,ny)) then
-
-			-- update fall pos
-			blox.falling[i].y=ny
-			blox.falling[i].x=nx
-
-			if (hits_player(nx,ny)) then
-				popup('player hit\n'..b.t,p.x,p.y)
-			end
-
-		elseif(can_destroy(nx,ny)) then
-
-			add(blox.splode,b) -- todo
-			mset(b.x,b.y,0)
-			deli(blox.falling,i)
-
-			popup('destroy:\n'..nx..','..ny,nx,ny)
-
-		else -- stop falling
-			if (deli(blox.falling,i)) then
-				-- add back to map
-				if (back2map) mset(b.x,b.y,b.t)
-			end
-		end
-	end
-end
-
-function kaboom_check()
-end
-
-function draw_falling_blox()
-	for b in all(blox.falling) do
-			spr(b.t,b.x*8,b.y*8)
-	end
-
-	-- todo explosions
-end
-
-function dislodge_above(x,y,move_x,move_y)
-
-	local dx=move_x or 0 -- no change
-	local dy=move_y or 1 -- down
-	local y_above=flr(y-1)
-
-	-- dislodge a block
-
-	if (can_fall(x,y_above)) then
-
-		-- block is now "falling"
-
-		local tile=mget(x,y_above)
-		local b={}
-		b.x=x
-		b.y=y_above
-		b.t=tile
-		b.dx=dx
-		b.dy=dy
-
-		add(blox.falling,b)
-		mset(x,y_above,0)
-		return true
-	end
-
-	return false
+function modal(text,any_key)
+	pause()
+	modal_msg.text=text
+	if (any_key) modal_msg.any_key=true
 end
 
 -->8
@@ -621,6 +708,7 @@ end
 -- bugs
 --   tick/hp death timing bug
 --   popups too quick (add countdown?)
+
 __gfx__
 00000000067700000677000044444444444444444444444444444444444ddd4444444444444444444444444444444444444444440000000000000e00008e0e08
 00000000677777006777770099499949994999494d444444444444444dd777d444461444444794444446e4444884488444444444000000000000000080e00880
